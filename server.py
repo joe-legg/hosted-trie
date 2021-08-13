@@ -6,12 +6,18 @@ class TrieNode:
     def __repr__(self):
         return "(" + str(self.is_word) + ", " + str(self.children) + ")"
 
-    def to_string(self, level):
-        string = ""
-        for char in self.children:
-            string += " " * level + char + "\n"
-            string += self.children[char].to_string(level + 1)
-        return string
+    def get_words(self):
+        words = []
+
+        def _get_words(node, prefix):
+            if node.is_word:
+                words.append(prefix)
+
+            for char in node.children:
+                _get_words(node.children[char], prefix + char)
+
+        _get_words(self, "")
+        return words
 
 class Trie:
     def __init__(self):
@@ -20,8 +26,8 @@ class Trie:
     def __repr__(self):
         return repr(self.root)
 
-    def __str__(self):
-       return self.root.to_string(0)
+    def get_words(self):
+        return self.root.get_words()
 
     def insert(self, word):
         cur_node = self.root
@@ -31,6 +37,23 @@ class Trie:
             cur_node = cur_node.children[char]
         cur_node.is_word = True
 
+    def delete(self, word):
+        cur_node = self.root
+        last_branch = self.root
+        last_branch_char = None
+
+        for char in word:
+            if char not in cur_node.children:
+                return # Can't delete because word does not exist
+            elif len(cur_node.children) > 1:
+                last_branch = cur_node
+                last_branch_char = char
+
+            cur_node = cur_node.children[char]
+
+        if cur_node.is_word:
+            del last_branch.children[last_branch_char]
+
     def search(self, word):
         cur_node = self.root
         for char in word:
@@ -39,14 +62,16 @@ class Trie:
             cur_node = cur_node.children[char]
         return cur_node.is_word
 
-    def delete(self, word):
-        # TODO: This isn't the most memory efficient implementation of delete
+
+    def search_with_prefix(self, prefix):
         cur_node = self.root
-        for char in word:
+
+        for char in prefix:
             if char not in cur_node.children:
-                return
+                return [] # Prefix does not exist
             cur_node = cur_node.children[char]
-        cur_node.is_word = False
+
+        return cur_node.get_words()
 
 trie = Trie()
 trie.insert("cat")
@@ -65,3 +90,8 @@ print("search for \"calling\": " + str(trie.search("calling")))
 print(repr(trie))
 print("str")
 print(str(trie))
+
+print(trie.get_words())
+
+print("search with prefix \"sys\"")
+print(trie.search_with_prefix("sys"))
