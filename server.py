@@ -1,3 +1,5 @@
+from fastapi import FastAPI, HTTPException, status
+
 class TrieNode:
     def __init__(self):
         self.is_word = False
@@ -6,18 +8,12 @@ class TrieNode:
     def __repr__(self):
         return "(" + str(self.is_word) + ", " + str(self.children) + ")"
 
-    def get_words(self):
-        words = []
+    def get_words(self, prefix, words):
+        if self.is_word:
+            words.append(prefix)
 
-        def _get_words(node, prefix):
-            if node.is_word:
-                words.append(prefix)
-
-            for char in node.children:
-                _get_words(node.children[char], prefix + char)
-
-        _get_words(self, "")
-        return words
+        for char in self.children:
+            self.children[char].get_words(prefix + char, words)
 
 class Trie:
     def __init__(self):
@@ -27,7 +23,9 @@ class Trie:
         return repr(self.root)
 
     def get_words(self):
-        return self.root.get_words()
+        words = []
+        self.root.get_words("", words)
+        return words
 
     def insert(self, word):
         cur_node = self.root
@@ -40,7 +38,8 @@ class Trie:
     def delete(self, word):
         cur_node = self.root
         last_branch = self.root
-        last_branch_char = None
+        # TODO: This causes a crash if word == ""
+        last_branch_char = word[0]
 
         for char in word:
             if char not in cur_node.children:
@@ -71,27 +70,44 @@ class Trie:
                 return [] # Prefix does not exist
             cur_node = cur_node.children[char]
 
-        return cur_node.get_words()
+        words = []
+        cur_node.get_words(prefix, words)
+        return words
+
+# API
 
 trie = Trie()
-trie.insert("cat")
-trie.insert("telephone")
-trie.insert("tell")
-trie.insert("system")
-trie.insert("systematic")
-print(repr(trie))
-trie.insert("calling")
-print(repr(trie))
-print("search for \"calling\": " + str(trie.search("calling")))
-print("search for \"asdf\": " + str(trie.search("asdf")))
-print("delete calling")
-trie.delete("calling")
-print("search for \"calling\": " + str(trie.search("calling")))
-print(repr(trie))
-print("str")
-print(str(trie))
+api = FastAPI()
 
-print(trie.get_words())
+@api.post("/trie/{word}", status_code=201)
+def api_insert(word: str):
+    """Insert a keyword into the trie."""
 
-print("search with prefix \"sys\"")
-print(trie.search_with_prefix("sys"))
+    trie.insert(word)
+    return { "success": True }
+
+@api.delete("/trie/{word}")
+def api_delete(word: str):
+    """Delete a keyword from the trie."""
+
+    trie.delete(word)
+    return { "success": True }
+
+@api.get("/trie/{prefix}")
+def api_search(prefix: str):
+    """Search the trie for a key with `prefix`."""
+
+    words = trie.search_with_prefix(prefix)
+    if words:
+        return { "keywords": words }
+
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"Keyword/prefix '{prefix}' does not exist in the trie."
+    )
+
+@api.get("/trie")
+def api_list_words():
+    """Get a list of all the keywords in the trie."""
+
+    return { "keywords": trie.get_words() }
