@@ -1,5 +1,6 @@
 import requests
 import argparse as arg
+import sys
 
 SERVER_URL = "http://127.0.0.1:8000"
 
@@ -69,6 +70,10 @@ if __name__ == "__main__":
 
     p_list = sub_parsers.add_parser("list", help="get a list of all the words in the trie")
     p_list.set_defaults(func=list)
+
+    if not len(sys.argv) > 1:
+        arg_parser.parse_args(["--help"])
+        sys.exit(0)
 
     args = arg_parser.parse_args()
     args.func(args)
