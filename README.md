@@ -1,6 +1,5 @@
 # Trie
 An implementation of a trie.
-Currently hosted at `https://hosted-trie.herokuapp.com`.
 
 Dependencies:
 - FastAPI
