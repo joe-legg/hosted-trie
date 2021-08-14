@@ -5,6 +5,7 @@ Dependencies:
 - FastAPI
 - requests
 - pytest
+- uvicorn
 
 ## Starting the server
 Run the following command to start the server.
