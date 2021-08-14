@@ -3,7 +3,7 @@ import requests
 import argparse as arg
 import sys
 
-SERVER_URL = "http://127.0.0.1:8000"
+SERVER_URL = "https://hosted-trie.herokuapp.com"
 
 def insert(args):
     try:
