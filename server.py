@@ -98,13 +98,7 @@ def api_search(prefix: str):
     """Search the trie for a key with `prefix`."""
 
     words = trie.search_with_prefix(prefix)
-    if words:
-        return { "keywords": words }
-
-    raise HTTPException(
-        status_code=status.HTTP_404_NOT_FOUND,
-        detail=f"Keyword/prefix '{prefix}' does not exist in the trie."
-    )
+    return { "keywords": words }
 
 @api.get("/trie")
 def api_list_words():
