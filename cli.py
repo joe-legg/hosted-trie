@@ -3,7 +3,7 @@ import requests
 import argparse as arg
 import sys
 
-SERVER_URL = "54.187.34.58:52010"
+SERVER_URL = "http://95.179.239.75:80"
 
 def insert(args):
     try:
@@ -22,7 +22,7 @@ def search(args):
         req = requests.get(f"{SERVER_URL}/trie/{args.keyword}")
         keywords = req.json()["keywords"]
 
-        if len(keywords) == 1 and keywords[0] == args.keyword:
+        if args.keyword in keywords:
             print("true")
         else:
             print("false")
