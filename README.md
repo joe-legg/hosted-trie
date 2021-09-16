@@ -1,5 +1,5 @@
 # Trie
-An implementation of a trie. (currently hosted at http://95.179.239.75:80)
+An implementation of a trie. (currently hosted at http://95.179.239.75:80/trie)
 
 Dependencies:
 - FastAPI
